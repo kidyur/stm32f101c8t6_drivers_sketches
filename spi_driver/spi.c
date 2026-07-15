@@ -51,10 +51,12 @@ static void _Init_GPIO(const enum kp_SPI1_GPIO_Speed speed) {
 	 * A15 - NSS  (Chip Select) - General output PULL-UP
 	 */
 	case kp_SPI1_GPIO_LAYOUT_SCND:
+		// Clock pins
+		RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
 		// Change AF layout
 		AFIO->MAPR |= AFIO_MAPR_SPI1_REMAP;
 		// Reset pins
-		GPIOB->CRL &= ~(0x38ul);
+		GPIOB->CRL &= ~(0xFFFul << 12);
 		GPIOA->CRH &= ~(0xFul << 28);
 		// General output PULL-UP for A15
 		GPIOA->ODR |= (1ul << 15);
@@ -62,13 +64,13 @@ static void _Init_GPIO(const enum kp_SPI1_GPIO_Speed speed) {
 			 // A15
 			GPIOA->CRH |= (0x1ul << 28);
 			// B5..3
-			GPIOB->CRL |= (0x949ul << 8);
+			GPIOB->CRL |= (0x949ul << 12);
 		} else if (speed == kp_SPI1_GPIO_Speed_2MHz) {
-			GPIOA->CRL |= (0x2ul << 28);
-			GPIOB->CRL |= (0xA4Aul << 8);
+			GPIOA->CRH |= (0x2ul << 28);
+			GPIOB->CRL |= (0xA4Aul << 12);
 		} else if (speed == kp_SPI1_GPIO_Speed_50MHz) {
-			GPIOA->CRL |= (0x3ul << 28);
-			GPIOB->CRL |= (0xB4Bul << 8);
+			GPIOA->CRH |= (0x3ul << 28);
+			GPIOB->CRL |= (0xB4Bul << 12);
 		}
 		break;
 	}
