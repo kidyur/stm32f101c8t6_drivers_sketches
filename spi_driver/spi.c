@@ -9,7 +9,7 @@
 #include "stm32f1xx_it.h"
 
 
-static uint8_t __gpioLayout = 0;
+volatile uint8_t __gpioLayout = 0;
 
 
 void SPI_Resume() {
@@ -34,16 +34,16 @@ static void __Init_GPIO(const enum SPI_GPIO_Speed speed) {
 	 */
 	case SPI_GPIO_LAYOUT_PRIM:
 		// Reset pins
-		GPIOA->CRL &= ~(0xFFFF << 4);
-		GPIOA->ODR &= ~(0xF << 4);
+		GPIOA->CRL &= ~(0xFFFFul << 16);
+		GPIOA->ODR &= ~(0xFul << 4);
 		// PULL-UP for A4
-		GPIOA->ODR |= (1 << 4);
+		GPIOA->ODR |= (1ul << 4);
 		if (speed == SPI_GPIO_Speed_10MHz)
-			GPIOA->CRL |= (0x9491 << 4);
+			GPIOA->CRL |= (0x9491ul << 16);
 		else if (speed == SPI_GPIO_Speed_2MHz)
-			GPIOA->CRL |= (0xA4A2 << 4);
+			GPIOA->CRL |= (0xA4A2ul << 16);
 		else if (speed == SPI_GPIO_Speed_50MHz)
-			GPIOA->CRL |= (0xB4B3 << 4);
+			GPIOA->CRL |= (0xB4B3ul << 16);
 		break;
 	/* [Secondary layout]
 	 * B5  - MOSI (Data Out)    - Alternate output push\pull
@@ -55,21 +55,21 @@ static void __Init_GPIO(const enum SPI_GPIO_Speed speed) {
 		// Change AF layout
 		AFIO->MAPR |= AFIO_MAPR_SPI1_REMAP;
 		// Reset pins
-		GPIOB->CRL &= ~(0x38);
-		GPIOA->CRH &= ~(0xF << 28);
+		GPIOB->CRL &= ~(0x38ul);
+		GPIOA->CRH &= ~(0xFul << 28);
 		// General output PULL-UP for A15
-		GPIOA->ODR |= (1 << 15);
+		GPIOA->ODR |= (1ul << 15);
 		if (speed == SPI_GPIO_Speed_10MHz) {
 			 // A15
-			GPIOA->CRH |= (0x1 << 28);
+			GPIOA->CRH |= (0x1ul << 28);
 			// B5..3
-			GPIOB->CRL |= (0x949 << 8);
+			GPIOB->CRL |= (0x949ul << 8);
 		} else if (speed == SPI_GPIO_Speed_2MHz) {
-			GPIOA->CRL |= (0x2 << 28);
-			GPIOB->CRL |= (0xA4A << 8);
+			GPIOA->CRL |= (0x2ul << 28);
+			GPIOB->CRL |= (0xA4Aul << 8);
 		} else if (speed == SPI_GPIO_Speed_50MHz) {
-			GPIOA->CRL |= (0x3 << 28);
-			GPIOB->CRL |= (0xB4B << 8);
+			GPIOA->CRL |= (0x3ul << 28);
+			GPIOB->CRL |= (0xB4Bul << 8);
 		}
 		break;
 	}
@@ -99,9 +99,9 @@ void SPI_Init(const uint8_t gpioLayout,
 void SPI_SendBytes_1(uint8_t data) {
 	  // CS to LOW
 	if (__gpioLayout == SPI_GPIO_LAYOUT_PRIM)
-		GPIOA->BRR = (1 << 4);
+		GPIOA->BRR = (1ul << 4);
 	else if (__gpioLayout == SPI_GPIO_LAYOUT_SCND)
-		GPIOA->BRR = (1 << 15);
+		GPIOA->BRR = (1ul << 15);
 	// wait until last operation isn't completed
 	while (!(SPI1->SR & SPI_SR_TXE));
 	// put data
@@ -110,7 +110,7 @@ void SPI_SendBytes_1(uint8_t data) {
 	while (SPI1->SR & SPI_SR_BSY);
 	// CS to HIGH
 	if (__gpioLayout == SPI_GPIO_LAYOUT_PRIM)
-		GPIOA->BSRR = (1 << 4);
+		GPIOA->BSRR = (1ul << 4);
 	else if (__gpioLayout == SPI_GPIO_LAYOUT_SCND)
-		GPIOA->BSRR = (1 << 15);
+		GPIOA->BSRR = (1ul << 15);
 }
