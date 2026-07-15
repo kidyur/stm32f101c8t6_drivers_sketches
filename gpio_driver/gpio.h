@@ -8,69 +8,82 @@
 #ifndef INC_DEVICE_DRIVERS_GPIO_H_
 #define INC_DEVICE_DRIVERS_GPIO_H_
 
-#include "device_drivers/gpio.h"
 #include "stm32f101xb.h"
 
+enum GPIO_Pin {
+	GPIO_Pin_0  = (0x0001ul << 0),
+	GPIO_Pin_1  = (0x0001ul << 1),
+	GPIO_Pin_2  = (0x0001ul << 2),
+	GPIO_Pin_3  = (0x0001ul << 3),
+	GPIO_Pin_4  = (0x0001ul << 4),
+	GPIO_Pin_5  = (0x0001ul << 5),
+	GPIO_Pin_6  = (0x0001ul << 6),
+	GPIO_Pin_7  = (0x0001ul << 7),
+	GPIO_Pin_8  = (0x0001ul << 8),
+	GPIO_Pin_9  = (0x0001ul << 9),
+	GPIO_Pin_10 = (0x0001ul << 10),
+	GPIO_Pin_11 = (0x0001ul << 11),
+	GPIO_Pin_12 = (0x0001ul << 12),
+	GPIO_Pin_13 = (0x0001ul << 13),
+	GPIO_Pin_14 = (0x0001ul << 14),
+	GPIO_Pin_15 = (0x0001ul << 15)
+};
 
-#define GPIO_PortA (uint32_t)0x04
-#define GPIO_PortB (uint32_t)0x08
-#define GPIO_PortC (uint32_t)0x10
-
-void GPIO_PortEnable(uint32_t port);
-
-
-// GPIO Output and Input Configurations
-#define GPIO_In_AnalogMode (uint32_t)0x00
-#define GPIO_In_FloatingInputMode (uint32_t)0x01
-#define GPIO_In_PullUpDown (uint32_t)0x02
-#define GPIO_In_Reserved (uint32_t)0x03
-
-#define GPIO_Out_GenPushPull (uint32_t)0x00
-#define GPIO_Out_GenOpenDrain (uint32_t)0x01
-#define GPIO_Out_AltPushPull (uint32_t)0x02
-#define GPIO_Out_AltOpenDrain (uint32_t)0x03
-
-void GPIO_SetConfig(GPIO_TypeDef *port, uint32_t pin, uint32_t config);
-
-
-// GPIO Speed Mode
-#define GPIO_InputMode (uint32_t)0x00
-#define GPIO_OutputMode_10MHz (uint32_t)0x01
-#define GPIO_OutputMode_2MHz (uint32_t)0x02
-#define GPIO_OutputMode_50MHz (uint32_t)0x03
-
-void GPIO_SetMode(GPIO_TypeDef * port, uint32_t pin, uint32_t mode);
-
-
-void GPIO_Init(GPIO_TypeDef *port,
-		uint32_t pin,
-		uint32_t mode,
-		uint32_t configuration);
+enum GPIO_Configuration {
+	GPIO_Configuration_O_GeneralPushPull = 0x1,
+	GPIO_Configuration_O_GeneralOpenDrain,
+	GPIO_Configuration_O_AltPushPull,
+	GPIO_Configuration_O_AltOpenDrain,
+	GPIO_Configuration_I_Analog,
+	GPIO_Configuration_I_Floating,
+	GPIO_Configuration_I_PullUpDown,
+	GPIO_Configuration_I_Reserved
+};
 
 
-void GPIO_WritePin(GPIO_TypeDef *port, uint32_t pin, uint32_t state);
+void GPIO_SetConfig(GPIO_TypeDef *port,
+		const uint16_t pinsFlags,
+		enum GPIO_Configuration);
 
 
-void GPIO_AtomicSetPins(GPIO_TypeDef * port, uint16_t flags);
+enum GPIO_Port {
+	GPIO_Port_A = 0x04,
+	GPIO_Port_B = 0x08,
+	GPIO_Port_C = 0x10,
+	GPIO_Port_D = 0x20,
+	GPIO_Port_E = 0x40
+};
 
-
-void GPIO_AtomicResetPins(GPIO_TypeDef * port, uint16_t flags);
-
-
-
+void GPIO_EnablePorts(enum GPIO_Port ports);
 
 
 
+enum GPIO_Mode {
+	GPIO_Mode_Input = 0x00,
+	GPIO_Mode_Output_10MHz,
+	GPIO_Mode_Output_2MHz,
+	GPIO_Mode_Output_50MHz
+};
+
+void GPIO_SetMode(GPIO_TypeDef * port,
+		const uint16_t pinsFlags,
+		enum GPIO_Mode);
 
 
+void GPIO_InitPins(GPIO_TypeDef *port,
+		const uint16_t pinsFlags,
+		enum GPIO_Mode,
+		enum GPIO_Configuration);
 
 
+enum GPIO_State {
+	GPIO_State_Low = 0,
+	GPIO_State_High
+};
 
-
-
-
-
-
+void GPIO_WritePins(GPIO_TypeDef *port,
+		const uint16_t pinsFlags,
+		enum GPIO_State);
 
 
 #endif /* INC_DEVICE_DRIVERS_GPIO_H_ */
