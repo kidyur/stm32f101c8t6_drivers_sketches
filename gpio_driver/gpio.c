@@ -1,11 +1,11 @@
 /*
- * gpio.c
+ * kp_GPIO.c
  *
  *  Created on: 10 июл. 2026 г.
  *      Author: kipin
  */
 
-#include "device_drivers/gpio.h"
+#include "device_drivers/GPIO.h"
 
 #define FULL_CHUNK 4
 #define MODE_CHUNK 2
@@ -29,7 +29,7 @@ const uint32_t _portsEnMasks[PORTS_SIZE] = {
 		0x40
 };
 
-void GPIO_EnablePort(GPIO_TypeDef * port) {
+void kp_GPIO_EnablePort(GPIO_TypeDef * port) {
 	for (int i = 0; i < PORTS_SIZE; i++) {
 		if ((uint32_t)port == _portsAddresses[i]) {
 			RCC->APB2ENR |= _portsEnMasks[i];
@@ -39,9 +39,9 @@ void GPIO_EnablePort(GPIO_TypeDef * port) {
 }
 
 
-void GPIO_SetConfig(GPIO_TypeDef *port,
+void kp_GPIO_SetConfig(GPIO_TypeDef *port,
 		const uint16_t pinsFlags,
-		enum GPIO_Configuration config) {
+		enum kp_GPIO_Configuration config) {
 	// For Input configurations.
 	// We need this decrement to have both I and O configurations
 	// under one enum.
@@ -65,9 +65,9 @@ void GPIO_SetConfig(GPIO_TypeDef *port,
 }
 
 
-void GPIO_SetMode(GPIO_TypeDef * port,
+void kp_GPIO_SetMode(GPIO_TypeDef * port,
 		const uint16_t pinsFlags,
-		enum GPIO_Mode mode) {
+		enum kp_GPIO_Mode mode) {
 	for (int i = 0; i < 16; i++) {
 		if (pinsFlags & (1 << i)) {
 			uint8_t pin = i;
@@ -84,38 +84,22 @@ void GPIO_SetMode(GPIO_TypeDef * port,
 }
 
 
-void GPIO_Init(GPIO_TypeDef *port,
+void kp_GPIO_Init(GPIO_TypeDef *port,
 		const uint16_t pinsFlags,
-		enum GPIO_Mode mode,
-		enum GPIO_Configuration cnf)
+		enum kp_GPIO_Mode mode,
+		enum kp_GPIO_Configuration cnf)
 {
-	GPIO_EnablePort(port);
-	GPIO_SetMode(port, pinsFlags, mode);
-	GPIO_SetConfig(port, pinsFlags, cnf);
+	kp_GPIO_EnablePort(port);
+	kp_GPIO_SetMode(port, pinsFlags, mode);
+	kp_GPIO_SetConfig(port, pinsFlags, cnf);
 }
 
 
-void GPIO_WritePins(GPIO_TypeDef *port,
+void kp_GPIO_WritePins(GPIO_TypeDef *port,
 		const uint16_t pinsFlags,
-		enum GPIO_State state) {
+		enum kp_GPIO_State state) {
 	if (state)
 		port->BSRR = pinsFlags;
 	else
 		port->BRR = pinsFlags;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
