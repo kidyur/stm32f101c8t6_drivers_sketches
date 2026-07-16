@@ -11,10 +11,31 @@
 #define MODE_CHUNK 2
 #define RST_FLAGS 0x3ul
 #define CRL_PINS 8
+#define PORTS_SIZE 5
 
+const uint32_t _portsAddresses[PORTS_SIZE] = {
+		(uint32_t)GPIOA,
+		(uint32_t)GPIOB,
+		(uint32_t)GPIOC,
+		(uint32_t)GPIOD,
+		(uint32_t)GPIOE
+};
 
-void GPIO_EnablePorts(enum GPIO_Port portsFlags) {
-	  RCC->APB2ENR |= portsFlags;
+const uint32_t _portsEnMasks[PORTS_SIZE] = {
+		0x04,
+		0x08,
+		0x10,
+		0x20,
+		0x40
+};
+
+void GPIO_EnablePort(GPIO_TypeDef * port) {
+	for (int i = 0; i < PORTS_SIZE; i++) {
+		if ((uint32_t)port == _portsAddresses[i]) {
+			RCC->APB2ENR |= _portsEnMasks[i];
+			return;
+		}
+	}
 }
 
 
@@ -68,6 +89,7 @@ void GPIO_Init(GPIO_TypeDef *port,
 		enum GPIO_Mode mode,
 		enum GPIO_Configuration cnf)
 {
+	GPIO_EnablePort(port);
 	GPIO_SetMode(port, pinsFlags, mode);
 	GPIO_SetConfig(port, pinsFlags, cnf);
 }
