@@ -48,3 +48,18 @@ void waitMicros(const uint32_t micros) {
 }
 ```
 
+### Appendix
+Proof of my solution using MCU Debug tool - DWT:
+```C
+CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+DWT->CYCCNT = 0;
+DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+waitMillis(1000);
+
+uint32_t stamp = DWT->CYCCNT; 
+// Debug: stamp = 8'000'058 what is appropriate
+//        for 1 second 
+``` 
+
