@@ -38,15 +38,46 @@ struct lcd_pin {
 };
 
 
+
+/**
+ * Pass {0, 0} as V0 argument to agree with default layout
+ *
+ * [Default layout]
+ * A0 - A7 -> D0 - D7
+ * B15     -> V0
+ * B14     -> RS
+ * B13     -> RW
+ * B12     -> E
+ */
 void lcd_init(
-		struct lcd_pin V0,
-		struct lcd_pin RS,
-		struct lcd_pin RW,
-		struct lcd_pin E,
+		struct lcd_pin * V0,
+		struct lcd_pin * RS,
+		struct lcd_pin * RW,
+		struct lcd_pin * E,
 		struct lcd_pin D[8]);
 
 
+void lcd_write(const uint8_t data);
 
+
+void lcd_switchDisplay(
+		const uint8_t displayOn,
+		const uint8_t cursorOn,
+		const uint8_t blinkOn);
+
+
+void lcd_clearScreen();
+
+
+void lcd_inputSet(
+		const uint8_t isIncrement,
+		const uint8_t isShift);
+
+
+void waitMicros(const uint32_t micros);
+
+
+void waitMillis(const uint16_t millis);
 
 
 
