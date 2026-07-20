@@ -57,8 +57,6 @@ void lcd_init(
 		struct lcd_pin D[8]);
 
 
-void lcd_write(const uint8_t data);
-
 
 void lcd_switchDisplay(
 		const uint8_t displayOn,
@@ -74,12 +72,31 @@ void lcd_inputSet(
 		const uint8_t isShift);
 
 
-void waitMicros(const uint32_t micros);
+void lcd_cursorReturn();
 
 
-void waitMillis(const uint16_t millis);
+void lcd_shift(const uint8_t isRight, const uint8_t isDisplay);
 
 
+void lcd_functionSet(
+		const uint8_t dataLength,
+		const uint8_t rows,
+		const uint8_t format);
+
+
+void lcd_read(const uint8_t flags);
+
+
+void lcd_createChar(const uint8_t addr, const uint8_t * matrix);
+
+
+void lcd_setCursorPosition(const uint8_t row, const uint8_t col);
+
+
+void lcd_write(const uint8_t data);
+
+
+void lcd_writeLine(const char * str);
 
 
 #endif /* INC_DEVICE_DRIVERS_LCD_H_ */

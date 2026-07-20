@@ -45,6 +45,8 @@ struct lcd_pin _D[DATA_SIZE] = {
 #define SYSTICK_LOAD_MILLIS 8000ul
 
 
+
+
 void waitMillis(const uint16_t millis) {
 	// Writes Reload Value
 	SysTick->LOAD = SYSTICK_LOAD_MILLIS * millis - 1ul;
@@ -171,6 +173,7 @@ void lcd_switchDisplay(
 	if (cursorOn)  flags |= 0x02ul;
 	if (blinkOn)   flags |= 0x01ul;
 	_sendCmd(LOW, LOW, flags);
+	waitMicros(50);
 }
 
 void lcd_init(
@@ -192,51 +195,117 @@ void lcd_init(
 
 	_initGPIO();
 
-	// Wait time > 15ms after Power On
 	waitMillis(20);
 
 	_sendCmd(0, 0, 0x30u);
-	// Wait time > 4.1ms after previous instruction
 	waitMillis(10);
 
 	_sendCmd(0, 0, 0x30u);
-	// Wait time > 100us after previous instruction
 	waitMicros(200);
 
 	_sendCmd(0, 0, 0x30u);
+	waitMicros(100);
 
-	_sendCmd(0, 0, 0x20u);
+	_sendCmd(0, 0, 0x38u);
+	waitMicros(50);
 
-	_sendCmd(0, 0, 0x20u);
-	_sendCmd(0, 0, 0xC0u);
+	_sendCmd(0, 0, 0x08u);
+	waitMicros(50);
 
-	_sendCmd(0, 0, 0x00u);
-	_sendCmd(0, 0, 0x80u);
+	lcd_clearScreen();
 
-	_sendCmd(0, 0, 0x00u);
-	_sendCmd(0, 0, 0x10u);
+	_sendCmd(0, 0, 0x06u);
+	waitMicros(50);
 
-	_sendCmd(0, 0, 0x00u);
-	_sendCmd(0, 0, 0x70u);
+	lcd_switchDisplay(1, 0, 0);
+
+	lcd_cursorReturn();
 }
 
 
 void lcd_clearScreen()
 {
 	_sendCmd(LOW, LOW, 0x01u);
+	waitMillis(2);
 }
 
 void lcd_cursorReturn()
 {
 	_sendCmd(LOW, LOW, 0x02u);
+	waitMillis(2);
 }
 
-void lcd_inputSet(const uint8_t isIncrement, const uint8_t isShift)
+void lcd_inputSet(const uint8_t isDecrement, const uint8_t isShift)
 {
 	uint8_t flags = 0x04u;
-	if (isIncrement) flags |= 0x02u;
+	if (isDecrement) flags |= 0x02u;
 	if (isShift)     flags |= 0x01u;
 	_sendCmd(LOW, LOW, flags);
+	waitMicros(50);
+}
+
+void lcd_shift(const uint8_t isRight, const uint8_t isDisplay)
+{
+	uint8_t flags = 0x10u;
+	if (isRight)    flags |= 0x04u;
+	if (isDisplay) flags |= 0x08u;
+	_sendCmd(LOW, LOW, flags);
+	waitMicros(50);
+}
+
+void lcd_functionSet(
+		const uint8_t dataLength,
+		const uint8_t rows,
+		const uint8_t format)
+{
+	uint8_t flags = 0x20u;
+	if (dataLength) flags |= 0x10u;
+	if (rows)       flags |= 0x08u;
+	if (format)     flags |= 0x04u;
+	_sendCmd(LOW, LOW, flags);
+	waitMicros(50);
 }
 
 
+void lcd_read(const uint8_t flags)
+{
+	_sendCmd(HIGH, HIGH, flags);
+	waitMicros(50);
+}
+
+void _DDRAM_setAddress(const uint8_t addr)
+{
+	_sendCmd(LOW, LOW, (1ul << 7) | addr);
+	waitMicros(50);
+}
+
+void _CGRAM_setAddress(const uint8_t addr)
+{
+	_sendCmd(LOW, LOW, (1ul << 6) | addr);
+	waitMicros(50);
+}
+
+
+void lcd_createChar(const uint8_t addr, const uint8_t * matrix)
+{
+	_CGRAM_setAddress((addr & 0x07u) << 3);
+	for (uint8_t i = 0; i < 8; i++)
+		lcd_write(matrix[i]);
+	lcd_setCursorPosition(0, 0);
+}
+
+
+void lcd_setCursorPosition(uint8_t row, uint8_t col)
+{
+	uint8_t ddaddr = col;
+	if (row == 1)
+		ddaddr |= 0x40;
+	_DDRAM_setAddress(ddaddr);
+}
+
+
+void lcd_writeLine(const char * str)
+{
+	for (int i = 0; str[i] != '\0'; i++)
+		lcd_write(str[i]);
+}
