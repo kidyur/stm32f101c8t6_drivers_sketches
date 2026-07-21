@@ -128,9 +128,9 @@ static void _initGPIO()
 static void _writePin(struct lcd_pin * pin, enum lcd_pin_state state)
 {
 	if (state)
-		pin->port->BSRR |= pin->pin_flag;
+		pin->port->BSRR = pin->pin_flag;
 	else
-		pin->port->BRR |= pin->pin_flag;
+		pin->port->BRR = pin->pin_flag;
 }
 
 
@@ -145,7 +145,7 @@ static void _setBus(const uint8_t flags)
 static void _pulseLatch()
 {
 	_writePin(&_E, HIGH);
-	_waitMicros(1000);
+	_waitMicros(600);
 	_writePin(&_E, LOW);
 }
 
@@ -194,7 +194,7 @@ static void _runInitSeq()
 	_sendCmd(0, 0, 0x30u);
 	_waitMicros(100);
 
-	lcd_functionSet(1, 1, 0);
+	lcd_functionSet(1, 2, 0);
 
 	lcd_switchDisplay(0, 0, 0);
 
@@ -281,21 +281,21 @@ int lcd_functionSet(
 }
 
 
-void lcd_read(const uint8_t flags)
+static void lcd_read(const uint8_t flags)
 {
 	_sendCmd(HIGH, HIGH, flags);
 	_waitMicros(ECYCLE_MIN_40US);
 }
 
 
-void _DDRAM_setAddress(const uint8_t addr)
+static void _DDRAM_setAddress(const uint8_t addr)
 {
 	_sendCmd(LOW, LOW, (1ul << 7) | addr);
 	_waitMicros(ECYCLE_MIN_40US);
 }
 
 
-void _CGRAM_setAddress(const uint8_t addr)
+static void _CGRAM_setAddress(const uint8_t addr)
 {
 	_sendCmd(LOW, LOW, (1ul << 6) | addr);
 	_waitMicros(ECYCLE_MIN_40US);
@@ -304,7 +304,7 @@ void _CGRAM_setAddress(const uint8_t addr)
 
 int lcd_createChar(const uint8_t addr, const uint8_t * matrix)
 {
-	if (addr < 0 || addr > 15)
+	if (addr > 15)
 		return LCD_ERROR_INVALID_ARG;
 	_CGRAM_setAddress(addr << 3);
 	for (uint8_t i = 0; i < 8; i++)
