@@ -10,6 +10,7 @@
 
 
 #include "stm32f101xb.h"
+#include <stdbool.h>
 
 
 enum lcd_pin_flag {
@@ -31,12 +32,16 @@ enum lcd_pin_flag {
 	lcd_pin_flag_15 = (0x0001ul << 15)
 };
 
+enum LCD_ERROR {
+	LCD_SUCCESS = 0,
+	LCD_ERROR_INVALID_ARG
+};
+
 
 struct lcd_pin {
 	GPIO_TypeDef * port;
 	enum lcd_pin_flag pin_flag;
 };
-
 
 
 /**
@@ -59,43 +64,70 @@ void lcd_init(
 
 
 void lcd_switchDisplay(
-		const uint8_t displayOn,
-		const uint8_t cursorOn,
-		const uint8_t blinkOn);
+		const bool displayOn,
+		const bool cursorOn,
+		const bool blinkOn);
 
 
 void lcd_clearScreen();
 
 
 void lcd_inputSet(
-		const uint8_t isIncrement,
-		const uint8_t isShift);
+		const bool decrementOn,
+		const bool shiftOn);
 
 
 void lcd_cursorReturn();
 
 
-void lcd_shift(const uint8_t isRight, const uint8_t isDisplay);
+void lcd_shift(const bool right, const bool fullDisplay);
 
+/**
+ * \param  rows Amount of visible rows on the display, 1 <= rows <= 2
+ * \throw  LCD_ERROR_INVALID_ARG if 'rows' does not satisfy the constraints
+ * \return LCD_SUCCESS           if there is no error
+ */
 
-void lcd_functionSet(
-		const uint8_t dataLength,
-		const uint8_t rows,
-		const uint8_t format);
+int lcd_functionSet(
+		const bool fullBus,
+		const int8_t rows,
+		const bool extendedGlyphFormat);
 
+/**
+ * \brief Use it to create your own character
+ * \param addr   Address in CGRAM, 0 <= addr < 16
+ * \param matrix Representation of the character,
+ *		  set bit - LED on, reset bit - LED off.
+ *		  format: 3 higher bits are not used
+ *		  		  5 lower bits represent character
+ *		  		  7 bytes represent your character
+ *		  		  8th (last) byte is for caret
+ * \throw  LCD_ERROR_INVALID_ARG if addr doesn't satisfy the constraints
+ * \return LCD_SUCCESS           if there is no error
+ * \example lcd_examples.c, see lcd_createCharExample();
+ */
+int lcd_createChar(const uint8_t addr, const uint8_t * matrix);
 
-void lcd_read(const uint8_t flags);
+/**
+ * \brief To set cursor position on the display
+ * \param row Cursors row, 0 <= row <= 1
+ * \param col Cursors col, 0 <= col <= 15
+ * \throw  LCD_ERROR_INVALID_ARG if position doesn't satisfy the constraints
+ * \return LCD_SUCCESS           if there is no error
+ */
+int lcd_setCursorPosition(const int8_t row, const int8_t col);
 
-
-void lcd_createChar(const uint8_t addr, const uint8_t * matrix);
-
-
-void lcd_setCursorPosition(const uint8_t row, const uint8_t col);
-
-
+/**
+ * \brief You can use it to write a character on the display.
+ * 	      It writes a symbol and moves caret, shifts side depends on
+ * 	      input mode (see lcd_inputSet())
+ * \param data Address of character in CGRAM
+ * 		  (see lcd-datasheet.pdf, p.12, Character Generator ROM Pattern)
+ * 		  addresses 0x00 - 0x0F for users patterns (see lcd_createChar())
+ */
 void lcd_write(const uint8_t data);
 
-
+// \brief Writes a string until first '\0'
 void lcd_writeLine(const char * str);
 
 
