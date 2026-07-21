@@ -69,7 +69,7 @@ void lcd_switchDisplay(
 		const bool blinkOn);
 
 
-void lcd_clearScreen();
+void lcd_clearScreen(void);
 
 
 void lcd_inputSet(
@@ -77,7 +77,7 @@ void lcd_inputSet(
 		const bool shiftOn);
 
 
-void lcd_cursorReturn();
+void lcd_cursorReturn(void);
 
 
 void lcd_shift(const bool right, const bool fullDisplay);

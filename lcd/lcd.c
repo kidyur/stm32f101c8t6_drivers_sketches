@@ -114,7 +114,7 @@ static void _initPin(struct lcd_pin * pin)
 	}
 }
 
-static void _initGPIO()
+static void _initGPIO(void)
 {
 	_initPin(&_V0);
 	_initPin(&_RS);
@@ -142,7 +142,7 @@ static void _setBus(const uint8_t flags)
 	}
 }
 
-static void _pulseLatch()
+static void _pulseLatch(void)
 {
 	_writePin(&_E, HIGH);
 	_waitMicros(600);
@@ -181,7 +181,7 @@ void lcd_switchDisplay(
 	_waitMicros(ECYCLE_MIN_40US);
 }
 
-static void _runInitSeq()
+static void _runInitSeq(void)
 {
 	_waitMillis(20);
 
@@ -227,14 +227,14 @@ void lcd_init(
 }
 
 
-void lcd_clearScreen()
+void lcd_clearScreen(void)
 {
 	_sendCmd(LOW, LOW, 0x01u);
 	_waitMillis(ECYCLE_MIN_1p53MS);
 }
 
 
-void lcd_cursorReturn()
+void lcd_cursorReturn(void)
 {
 	_sendCmd(LOW, LOW, 0x02u);
 	_waitMillis(ECYCLE_MIN_1p53MS);
